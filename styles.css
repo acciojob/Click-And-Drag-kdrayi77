@@ -18,13 +18,11 @@ body {
   overflow: hidden;
 }
 
-/* FIX: grid is now on .items, not directly on container */
+/* FIX: Ensure .items always has height */
 .items {
   width: 100%;
   height: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 10px;
+  position: relative; /* so absolutely positioned cubes stay inside */
 }
 
 .cube {
@@ -35,6 +33,7 @@ body {
   cursor: grab;
   user-select: none;
   transition: box-shadow 0.2s;
+  position: absolute; /* start absolute */
 }
 
 .cube:active {

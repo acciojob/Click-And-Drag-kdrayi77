@@ -1,46 +1,54 @@
-const container = document.querySelector('.container');
-const cubes = document.querySelectorAll('.cube');
+const container = document.getElementById("container");
+const cubes = document.querySelectorAll(".cube");
 
 let selectedCube = null;
 let offsetX = 0;
 let offsetY = 0;
 
 cubes.forEach(cube => {
-  // Initial positioning based on grid
-  const index = Array.from(cubes).indexOf(cube);
-  const col = index % 4;
-  const row = Math.floor(index / 4);
-  cube.style.left = `${col * 110}px`;
-  cube.style.top = `${row * 110}px`;
+  // Make cubes absolutely positioned relative to container
+  cube.style.position = "absolute";
 
-  cube.addEventListener('mousedown', (e) => {
+  // Store initial grid positions
+  const rect = cube.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  cube.style.left = rect.left - containerRect.left + "px";
+  cube.style.top = rect.top - containerRect.top + "px";
+
+  // Mouse down event
+  cube.addEventListener("mousedown", (e) => {
     selectedCube = cube;
-    offsetX = e.clientX - cube.offsetLeft;
-    offsetY = e.clientY - cube.offsetTop;
-    cube.style.cursor = 'grabbing';
+
+    // Calculate offset between mouse and cube position
+    const cubeRect = cube.getBoundingClientRect();
+    offsetX = e.clientX - cubeRect.left;
+    offsetY = e.clientY - cubeRect.top;
+
+    cube.style.zIndex = 1000; // Bring dragged cube to front
   });
 });
 
-document.addEventListener('mousemove', (e) => {
-  if (!selectedCube) return;
+// Mouse move event on whole document
+document.addEventListener("mousemove", (e) => {
+  if (selectedCube) {
+    const containerRect = container.getBoundingClientRect();
+    let newLeft = e.clientX - containerRect.left - offsetX;
+    let newTop = e.clientY - containerRect.top - offsetY;
 
-  let x = e.clientX - offsetX;
-  let y = e.clientY - offsetY;
+    // Constrain within boundaries
+    newLeft = Math.max(0, Math.min(newLeft, containerRect.width - selectedCube.offsetWidth));
+    newTop = Math.max(0, Math.min(newTop, containerRect.height - selectedCube.offsetHeight));
 
-  // Boundary constraints
-  const maxX = container.clientWidth - selectedCube.offsetWidth;
-  const maxY = container.clientHeight - selectedCube.offsetHeight;
-
-  x = Math.max(0, Math.min(x, maxX));
-  y = Math.max(0, Math.min(y, maxY));
-
-  selectedCube.style.left = `${x}px`;
-  selectedCube.style.top = `${y}px`;
+    // Apply new position
+    selectedCube.style.left = newLeft + "px";
+    selectedCube.style.top = newTop + "px";
+  }
 });
 
-document.addEventListener('mouseup', () => {
+// Mouse up event
+document.addEventListener("mouseup", () => {
   if (selectedCube) {
-    selectedCube.style.cursor = 'grab';
+    selectedCube.style.zIndex = 1; // Reset stacking order
     selectedCube = null;
   }
 });
